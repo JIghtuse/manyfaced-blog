@@ -1,41 +1,70 @@
 """Multi-user blog"""
 
-import os
-import jinja2
 import webapp2
+from google.appengine.ext import ndb
+from handler import Handler
 
 
-class Handler(webapp2.RequestHandler):
-    """Extends webapp2 handler to use jinja2 template files"""
+class Post(ndb.Model):
+    """Models post in a blog with title, content, and creation date"""
+    title = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
-    TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
-    JINJA_FS_LOADER = jinja2.FileSystemLoader(TEMPLATES_DIR)
-    JINJA_ENV = jinja2.Environment(loader=JINJA_FS_LOADER, autoescape=True)
-
-    @classmethod
-    def render_template(cls, template_filename, **params):
-        """Renders jinja2 template with specified params"""
-        template = cls.JINJA_ENV.get_template(template_filename)
-        return template.render(params)
-
-    def write(self, *a, **kw):
-        """Writes input parameters to output"""
-        self.response.out.write(*a, **kw)
-
-    def render(self, template_filename, **kw):
-        """Use helper functions to output template with specified parameters"""
-        self.write(Handler.render_template(template_filename, **kw))
+    def render(self):
+        return Handler.render_template("post.html", post=self)
 
 
-class MainPage(Handler):
-    """Handles blog main page"""
+class HomePage(Handler):
+    """Displays blog home page with posts"""
+    def get(self):
+        posts = Post.query().order(-Post.creation_date).fetch(limit=10)
+        self.render("main_page.html", posts=posts)
+
+
+class NewPostPage(Handler):
+    """Displays form to submit new posts"""
+    def render_page(self, **kw):
+        self.render("new_post.html", **kw)
 
     def get(self):
-        """Displays posts in blog"""
-        self.render("main_page.html", posts=[])
+        self.render_page()
+
+    def post(self):
+        title = self.request.get('title')
+        content = self.request.get('content')
+        params = dict(title=title, content=content)
+
+        if content and title:
+            # Creating a post
+            post = Post(content=content, title=title)
+            post.put()
+
+            # Redirecting to post permalink page
+            post_id = post.key.id()
+            self.redirect("/blog/" + str(post_id))
+        else:
+            # Showing errors
+            if not title:
+                params['post_title_error'] = "Post title cannot be empty"
+            if not content:
+                params['post_content_error'] = "Post content cannot be empty"
+            self.render_page(**params)
+
+
+class PostPermalinkPage(Handler):
+    """Displays a single blog post"""
+    def get(self, post_id):
+        post = Post.get_by_id(int(post_id))
+        if not post:
+            self.error(404)
+        else:
+            self.render("post_permalink.html", post=post)
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/blog', MainPage),
+    ('/', HomePage),
+    ('/blog/?', HomePage),
+    ('/blog/newpost', NewPostPage),
+    ('/blog/(\d+)', PostPermalinkPage)
 ], debug=True)
