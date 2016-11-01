@@ -15,6 +15,25 @@ class Post(ndb.Model):
         return Handler.render_template("post.html", post=self)
 
 
+class User(ndb.Model):
+    """Models blog user"""
+    name = ndb.StringProperty(required=True)
+    password_hash = ndb.StringProperty(required=True)
+    salt = ndb.StringProperty(required=True)
+    email = ndb.StringProperty()
+
+    @classmethod
+    def by_name(cls, name):
+        return User.all().filter('name =', name).get()
+
+    @classmethod
+    def make(cls, name, password_hash, salt, email=None):
+        return User(name=name,
+                    password_hash=password_hash,
+                    salt=salt,
+                    email=email)
+
+
 class HomePage(Handler):
     """Displays blog home page with posts"""
     def get(self):
