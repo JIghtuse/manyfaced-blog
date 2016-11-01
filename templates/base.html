@@ -3,11 +3,14 @@
 <html>
     <head>
         <title>Manyfaced blog</title>
+        <link rel="stylesheet" href="/css/main.css">
     </head>
 
     <body>
-        <h1><a href="/blog">Manyfaced blog</a></h1>
-        {% block content %}
-        {% endblock %}
+        <div class="content">
+            <h1><a href="/blog">Manyfaced blog</a></h1>
+            {% block content %}
+            {% endblock %}
+        </div>
     </body>
 </html>
