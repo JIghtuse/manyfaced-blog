@@ -34,7 +34,8 @@ class NewPostPage(BlogHandler):
 
         if content and title:
             # Creating a post
-            post = Post(content=content, title=title)
+            post = Post(content=content, title=title,
+                        author=self.user.key)
             post.put()
 
             # Redirecting to post permalink page
@@ -56,7 +57,8 @@ class PostPermalinkPage(BlogHandler):
         if not post:
             self.error(404)
         else:
-            self.render("post_permalink.html", post=post)
+            author = User.get_by_id(post.author.id())
+            self.render("post_permalink.html", post=post, author=author)
 
 
 class WelcomePage(BlogHandler):

@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 from blog_handler import BlogHandler
+from user import User
 
 
 class Post(ndb.Model):
@@ -7,6 +8,9 @@ class Post(ndb.Model):
     title = ndb.StringProperty(required=True)
     content = ndb.TextProperty(required=True)
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
+    author = ndb.KeyProperty(kind=User, required=True)
 
     def render(self):
-        return BlogHandler.render_template("post.html", post=self)
+        author = User.get_by_id(self.author.id())
+        return BlogHandler.render_template("post.html", post=self,
+                                           author=author.name)
