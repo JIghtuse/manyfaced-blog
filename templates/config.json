@@ -386,6 +386,7 @@
     "grid.less",
     "forms.less",
     "buttons.less",
+    "glyphicons.less",
     "navs.less",
     "navbar.less",
     "pagination.less",
@@ -395,5 +396,5 @@
     "alert.js",
     "dropdown.js"
   ],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=2f30cbef630e47bcf302c47fb6b6a03d"
+  "customizerUrl": "https://getbootstrap.com/customize/?id=1aef36ea24252efed6839833a748a1f8"
 }

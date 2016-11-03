@@ -6,6 +6,9 @@ handlers:
 - url: /css
   static_dir: templates/css
 
+- url: /fonts
+  static_dir: templates/fonts
+
 - url: /.*
   script: main.app
 
