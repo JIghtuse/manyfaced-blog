@@ -1,8 +1,12 @@
 .content {
     margin: 0 auto;
-    max-width: 30em;
+    max-width: 60em;
 }
 
 h1 {
     text-align: center
+}
+
+.error {
+    color: red;
 }

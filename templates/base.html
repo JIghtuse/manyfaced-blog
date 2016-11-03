@@ -3,16 +3,19 @@
 <html>
     <head>
         <title>Manyfaced blog</title>
+        <link rel="stylesheet" href="/css/bootstrap.css">
         <link rel="stylesheet" href="/css/main.css">
     </head>
 
     <body>
         <div class="content">
-            <h1>Manyfaced blog</h1>
-            <nav>
-                {% for link in NAVIGATION_LINKS: %}
-                <a href="{{link.url}}">{{link.description}}</a>
-                {% endfor %}
+            <h1 class="text-uppercase">Manyfaced blog</h1>
+            <nav class="navbar navbar-default">
+                <ul class="nav navbar-nav">
+                    {% for link in NAVIGATION_LINKS: %}
+                    <li><a href="{{link.url}}">{{link.description}}</a></li>
+                    {% endfor %}
+                </ul>
             </nav>
             {% block content %}
             {% endblock %}

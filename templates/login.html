@@ -6,17 +6,19 @@
 
     <div>
         <label for="username">Username</label>
-        <input type="text" name="username" value="{{username}}" id="username">
-        <div class="error">{{login_error}}</div>
+        <input type="text" name="username" value="{{username}}" id="username" class="form-control">
+        {% if login_error: %}
+        <div class="alert alert-danger">{{login_error}}</div>
+        {% endif %}
     </div>
 
     <div>
         <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        <input type="password" name="password" id="password" class="form-control">
     </div>
 
     <div>
-        <input type="submit">
+        <input type="submit" class="btn btn-primary">
     </div>
 </form>
 
