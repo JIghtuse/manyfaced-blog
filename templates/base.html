@@ -11,6 +11,39 @@
         <div class="content">
             <h1 class="text-uppercase">Manyfaced blog</h1>
             <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+                            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+                            <span class="sr-only">Toggle navigation</span>
+                        </button>
+                        <a class="navbar-brand text-uppercase" href="#">Manyfaced</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="navbar">
+                        <ul class="nav navbar-nav">
+                            {% if user: %}
+                            <li><a href="/blog/newpost">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                New post</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            {% if not user: %}
+                            <li><a href="/blog/signup">Signup</a></li>
+                            <li><a href="/blog/login">Login</a></li>
+                            {% else: %}
+                            <li>
+                                <a href="#">
+                                    <span class="glyphicon glyphicon-user"></span>
+                                    {{user.name}}
+                                </a>
+                            </li>
+                            <li><a href="/blog/logout">Logout</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
             </nav>
             {% block content %}
             {% endblock %}

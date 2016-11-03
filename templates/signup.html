@@ -8,7 +8,10 @@
         <label for="username">Username</label>
         <input type="text" name="username" value="{{username}}" id="username" class="form-control">
         {% if username_error: %}
-        <div class="alert alert-danger">{{username_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{username_error}}
+        </div>
         {% endif %}
     </div>
 
@@ -16,7 +19,10 @@
         <label for="password">Password</label>
         <input type="password" name="password" id="password" class="form-control">
         {% if password_error: %}
-        <div class="alert alert-danger">{{password_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{password_error}}
+        </div>
         {% endif %}
     </div>
 
@@ -24,7 +30,10 @@
         <label for="verify">Verify Password</label>
         <input type="password" name="verify" id="verify" class="form-control">
         {% if verify_error: %}
-        <div class="alert alert-danger">{{verify_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{verify_error}}
+        </div>
         {% endif %}
     </div>
 
@@ -32,7 +41,10 @@
         <label for="email">Email (optional)</label>
         <input type="text" name="email" value="{{email}}" id="email" class="form-control">
         {% if email_error: %}
-        <div class="alert alert-danger">{{email_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{email_error}}
+        </div>
         {% endif %}
     </div>
 
