@@ -2,7 +2,6 @@ import webapp2
 from handler import Handler
 from cookie import make_cookie, check_cookie
 from user import User
-from links import NAVIGATION_LINKS
 
 
 class BlogHandler(Handler):
@@ -10,7 +9,6 @@ class BlogHandler(Handler):
 
     def render(self, template_filename, **kw):
         kw['user'] = self.user
-        kw['NAVIGATION_LINKS'] = NAVIGATION_LINKS
         Handler.render(self, template_filename, **kw)
 
     def set_secure_cookie(self, name, value):

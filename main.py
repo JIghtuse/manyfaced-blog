@@ -5,7 +5,6 @@ import webapp2
 from blog_handler import BlogHandler
 from user import User
 from post import Post
-from links import COMMON_LINKS
 
 
 class HomePage(BlogHandler):
@@ -24,7 +23,7 @@ class NewPostPage(BlogHandler):
         if self.user:
             self.render_page()
         else:
-            self.redirect(COMMON_LINKS["signup"])
+            self.redirect("/blog/signup")
 
     def post(self):
         # TODO: check that only logged in user can post
@@ -67,9 +66,9 @@ class WelcomePage(BlogHandler):
         if self.user:
             self.render("welcome.html", username=self.user.name)
         else:
-            self.redirect(COMMON_LINKS["signup"])
+            self.redirect("/blog/signup")
 
-            
+
 class SignupPage(BlogHandler):
     USERNAME_RE = re.compile("^[a-zA-Z0-9_-]{3,20}$")
     PASSWORD_RE = re.compile("^.{3,20}$")
@@ -123,7 +122,7 @@ class SignupPage(BlogHandler):
             user.put()
 
             self.login(user)
-            self.redirect(COMMON_LINKS["welcome"])
+            self.redirect("/blog/welcome")
 
 
 class LoginPage(BlogHandler):
@@ -137,7 +136,7 @@ class LoginPage(BlogHandler):
         user = User.login(username, password)
         if user:
             self.login(user)
-            self.redirect(COMMON_LINKS["welcome"])
+            self.redirect("/blog/welcome")
         else:
             self.render("login.html",
                         username=username,
@@ -147,16 +146,16 @@ class LoginPage(BlogHandler):
 class LogoutHandler(BlogHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
-        self.redirect(COMMON_LINKS["signup"])
+        self.redirect("/blog/signup")
 
 
 app = webapp2.WSGIApplication([
     ('/', HomePage),
     ('/blog/?', HomePage),
     ('/blog/(\d+)', PostPermalinkPage),
-    (COMMON_LINKS['newpost'], NewPostPage),
-    (COMMON_LINKS['welcome'], WelcomePage),
-    (COMMON_LINKS['signup'], SignupPage),
-    (COMMON_LINKS['login'], LoginPage),
-    (COMMON_LINKS['logout'], LogoutHandler),
+    ('/blog/newpost', NewPostPage),
+    ('/blog/welcome', WelcomePage),
+    ('/blog/signup', SignupPage),
+    ('/blog/login', LoginPage),
+    ('/blog/logout', LogoutHandler),
 ], debug=True)
