@@ -390,11 +390,12 @@
     "navs.less",
     "navbar.less",
     "pagination.less",
-    "alerts.less"
+    "alerts.less",
+    "component-animations.less"
   ],
   "js": [
     "alert.js",
     "dropdown.js"
   ],
-  "customizerUrl": "https://getbootstrap.com/customize/?id=1aef36ea24252efed6839833a748a1f8"
+  "customizerUrl": "https://getbootstrap.com/customize/?id=29fe84c509b99a15836e3d88a92b290c"
 }
