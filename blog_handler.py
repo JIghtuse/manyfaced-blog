@@ -29,3 +29,10 @@ class BlogHandler(Handler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie(BlogHandler.COOKIE_USER_ID)
         self.user = uid and User.get_by_id(int(uid))
+
+
+class BlogRegisteredOnlyHandler(BlogHandler):
+    def initialize(self, *a, **kw):
+        BlogHandler.initialize(self, *a, **kw)
+        if not self.user:
+            self.redirect("/blog/signup", abort=True)

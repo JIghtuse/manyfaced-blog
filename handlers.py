@@ -1,5 +1,5 @@
 import re
-from blog_handler import BlogHandler
+from blog_handler import BlogHandler, BlogRegisteredOnlyHandler
 from post import Post
 from user import User
 
@@ -11,19 +11,15 @@ class HomePage(BlogHandler):
         self.render("main_page.html", posts=posts)
 
 
-class NewPostPage(BlogHandler):
+class NewPostPage(BlogRegisteredOnlyHandler):
     """Displays form to submit new posts"""
     def render_page(self, **kw):
         self.render("new_post.html", **kw)
 
     def get(self):
-        if self.user:
-            self.render_page()
-        else:
-            self.redirect("/blog/signup")
+        self.render_page()
 
     def post(self):
-        # TODO: check that only logged in user can post
         title = self.request.get('title')
         content = self.request.get('content')
         params = dict(title=title, content=content)
@@ -57,13 +53,10 @@ class PostPermalinkPage(BlogHandler):
             self.render("post_permalink.html", post=post, author=author)
 
 
-class WelcomePage(BlogHandler):
+class WelcomePage(BlogRegisteredOnlyHandler):
     """Displays greeting for logged in user"""
     def get(self):
-        if self.user:
-            self.render("welcome.html", username=self.user.name)
-        else:
-            self.redirect("/blog/signup")
+        self.render("welcome.html", username=self.user.name)
 
 
 class SignupPage(BlogHandler):
@@ -140,7 +133,7 @@ class LoginPage(BlogHandler):
                         login_error="Invalid login")
 
 
-class LogoutHandler(BlogHandler):
+class LogoutHandler(BlogRegisteredOnlyHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
         self.redirect("/blog/signup")
