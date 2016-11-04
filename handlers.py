@@ -60,6 +60,8 @@ class WelcomePage(BlogRegisteredOnlyHandler):
 
 
 class SignupPage(BlogHandler):
+    """Displays form allowing user to sign up.
+    Adds user to database after successful registration"""
     USERNAME_RE = re.compile("^[a-zA-Z0-9_-]{3,20}$")
     PASSWORD_RE = re.compile("^.{3,20}$")
     EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
@@ -76,11 +78,10 @@ class SignupPage(BlogHandler):
     def get(self):
         self.render("signup.html", username="")
 
-    def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+    def form_is_valid(self, username, password, verify, email):
+        """Validates form input.
+        Returns (True, None) if input is valid,
+        Returns (False, parameters to pass to template) if input is invalid"""
 
         template_params = dict(username=username, email=email)
         invalid_input = False
@@ -94,7 +95,6 @@ class SignupPage(BlogHandler):
             invalid_input = True
         if password != verify:
             template_params['verify_error'] = "Passwords doesn't match"
-
             invalid_input = True
         if email and not self.valid_email(email):
             template_params['email_error'] = "Invalid email"
@@ -106,7 +106,21 @@ class SignupPage(BlogHandler):
             invalid_input = True
 
         if invalid_input:
-            self.render("signup.html", **template_params)
+            return False, template_params
+        else:
+            return True, None
+
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
+
+        valid_input, params = self.form_is_valid(username, password,
+                                                 verify, email)
+
+        if not valid_input:
+            self.render("signup.html", **params)
         else:
             user = User.register(username, password, email)
             user.put()
@@ -116,8 +130,11 @@ class SignupPage(BlogHandler):
 
 
 class LoginPage(BlogHandler):
+    def render_login_form(self, username="", login_error=None):
+        self.render("login.html", username=username, login_error=login_error)
+
     def get(self):
-        self.render("login.html", username="")
+        self.render_login_form()
 
     def post(self):
         username = self.request.get('username')
@@ -128,9 +145,7 @@ class LoginPage(BlogHandler):
             self.login(user)
             self.redirect(self.uri_for("welcome"))
         else:
-            self.render("login.html",
-                        username=username,
-                        login_error="Invalid login")
+            self.render_login_form(username, "Invalid login")
 
 
 class LogoutHandler(BlogRegisteredOnlyHandler):
