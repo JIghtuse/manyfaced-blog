@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<article class="post">
     {{ post.render(True) | safe }}
+</article>
 {% endblock %}

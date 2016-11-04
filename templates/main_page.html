@@ -3,7 +3,9 @@
 {% block content %}
 
 {% for post in posts: %}
+<article class="post">
     {{ post.render() | safe }}
+</article>
 {% endfor %}
 
 {% endblock %}

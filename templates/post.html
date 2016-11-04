@@ -1,20 +1,18 @@
-<article class="post">
-    <div class="post-header row">
-        <div class="col-xs-9">
-            <h2 class="post-title">
-                {% if permalink: %}
-                {{ post.title }}
-                {% else %}
-                <a href="/blog/{{post.key.id()}}">{{ post.title }}</a>
-                {% endif %}
-            </h2>
-        </div>
-        <div class="col-xs-3">
-        {{ post.creation_date.strftime("%d %B %Y") }}
-        by {{ author }}
-        </div>
+<div class="post-header row">
+    <div class="col-xs-9">
+        <h2 class="post-title">
+            {% if permalink: %}
+            {{ post.title }}
+            {% else %}
+            <a href="/blog/{{post.key.id()}}">{{ post.title }}</a>
+            {% endif %}
+        </h2>
     </div>
-    <div class="post-content">
-    {{ post.content | nl2br }}
+    <div class="col-xs-3">
+    {{ post.creation_date.strftime("%d %B %Y") }}
+    by {{ author }}
     </div>
-</article>
+</div>
+<div class="post-content">
+{{ post.content | nl2br }}
+</div>
