@@ -35,4 +35,4 @@ class BlogRegisteredOnlyHandler(BlogHandler):
     def initialize(self, *a, **kw):
         BlogHandler.initialize(self, *a, **kw)
         if not self.user:
-            self.redirect("/blog/signup", abort=True)
+            self.redirect(self.uri_for("signup"), abort=True)

@@ -32,7 +32,7 @@ class NewPostPage(BlogRegisteredOnlyHandler):
 
             # Redirecting to post permalink page
             post_id = post.key.id()
-            self.redirect("/blog/" + str(post_id))
+            self.redirect(self.uri_for("permalink", post_id=str(post_id)))
         else:
             # Showing errors
             if not title:
@@ -112,7 +112,7 @@ class SignupPage(BlogHandler):
             user.put()
 
             self.login(user)
-            self.redirect("/blog/welcome")
+            self.redirect(self.uri_for("welcome"))
 
 
 class LoginPage(BlogHandler):
@@ -126,7 +126,7 @@ class LoginPage(BlogHandler):
         user = User.login(username, password)
         if user:
             self.login(user)
-            self.redirect("/blog/welcome")
+            self.redirect(self.uri_for("welcome"))
         else:
             self.render("login.html",
                         username=username,
@@ -136,4 +136,4 @@ class LoginPage(BlogHandler):
 class LogoutHandler(BlogRegisteredOnlyHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
-        self.redirect("/blog/signup")
+        self.redirect(self.uri_for("signup"))
