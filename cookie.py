@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hmac
+import logging
 from secret import SECRET
 
 SEPARATOR = '|'
@@ -18,6 +19,8 @@ def check_secure_val(sh):
     s, hash_value = sh.split(SEPARATOR)
     if hash_str(s) == hash_value:
         return s
+    else:
+        logging.warning("Something wrong with value or hash: " + sh)
 
 
 def make_cookie(name, value):
