@@ -6,14 +6,20 @@
         <label for="post-title">Title</label>
         <input type="text", id="post-title", name="title", value="{{title}}" class="form-control">
         {% if post_title_error: %}
-        <div class="error">{{post_title_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{post_title_error}}
+        </div>
         {% endif %}
     </div>
     <div>
         <label for="post-content">Content</label>
         <textarea id="post-content", name="content" class="form-control" rows="10">{{content}}</textarea>
         {% if post_content_error: %}
-        <div class="error">{{post_content_error}}</div>
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{post_content_error}}
+        </div>
         {% endif %}
     </div>
     <div>

@@ -7,6 +7,28 @@ h1 {
     text-align: center
 }
 
-.error {
-    color: red;
+.post-header {
+    border-bottom: 1px solid #000;
+    font-size: 0px;
+}
+
+.post-header > * {
+    float: none;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.post-header > *:last-child {
+    vertical-align: bottom;
+}
+
+.post-title {
+    margin: 0;
+}
+
+.post {
+    padding: 1em;
+    margin-bottom: 1em;
+    background-color: #eee;
+    border-radius: 10px;
 }
