@@ -3,6 +3,7 @@
 {% block content %}
 <article class="post">
     {{ post.render(True) | safe }}
+    {% if user: %}
     <div class="post-footer">
         <form method="post" id="post-delete-form">
             <input type="hidden" name="post_id" value="{{post.key.id()}}">
@@ -16,5 +17,6 @@
             </button>
         </form>
     </div>
+    {% endif %}
 </article>
 {% endblock %}
