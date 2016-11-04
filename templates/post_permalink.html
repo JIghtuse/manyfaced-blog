@@ -3,5 +3,18 @@
 {% block content %}
 <article class="post">
     {{ post.render(True) | safe }}
+    <div class="post-footer">
+        <form method="post" id="post-delete-form">
+            <input type="hidden" name="post_id" value="{{post.key.id()}}">
+            <button type="submit" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove-circle"></span>
+                Delete post
+            </button>
+            <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-edit"></span>
+                Edit post
+            </button>
+        </form>
+    </div>
 </article>
 {% endblock %}
