@@ -1,3 +1,4 @@
+import logging
 import re
 from blog_handler import BlogHandler, BlogRegisteredOnlyHandler
 from post import Post
@@ -51,6 +52,26 @@ class PostPermalinkPage(BlogHandler):
         else:
             author = User.get_by_id(post.author.id())
             self.render("post_permalink.html", post=post, author=author)
+
+    def post(self, post_id):
+        edit = self.request.get('post-edit', None)
+        delete = self.request.get('post-delete', None)
+
+        post = Post.get_by_id(int(post_id))
+        current_user_id = self.user.key.id()
+        if post.author.id() != current_user_id:
+            logging.warning("User {} tried to change post {}".format(
+                current_user_id,
+                post_id))
+            return self.error(403)
+
+        if edit is not None:
+            self.write("editing post")
+        elif delete is not None:
+            self.write("deleting post")
+        else:
+            logging.warning("Suspicious request: " + str(self.request))
+            self.error(400)
 
 
 class WelcomePage(BlogRegisteredOnlyHandler):
