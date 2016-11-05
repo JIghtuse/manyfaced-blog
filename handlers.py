@@ -59,6 +59,11 @@ class PostPermalinkPage(BlogHandler):
 
         post = Post.get_by_id(int(post_id))
         current_user_id = self.user.key.id()
+
+        if not post:
+            logging.warning("Suspicious request: " + str(self.request))
+            self.error(400)
+
         if post.author.id() != current_user_id:
             logging.warning("User {} tried to change post {}".format(
                 current_user_id,
