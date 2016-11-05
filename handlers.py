@@ -119,43 +119,41 @@ class PostPermalinkPage(BlogHandler):
                         post_score=self.post_score(post.key))
 
     def post(self, post_id):
-        edit = self.request.get('post-edit', None)
-        delete = self.request.get('post-delete', None)
-        like = self.request.get('post-like', None)
-        unlike = self.request.get('post-unlike', None)
+        edit = self.request.get('post-edit', None) is not None
+        delete = self.request.get('post-delete', None) is not None
+        like = self.request.get('post-like', None) is not None
+        unlike = self.request.get('post-unlike', None) is not None
 
         post = Post.get_by_id(int(post_id))
         current_user_id = self.user.key.id()
-        logging.warning(self.request)
 
         if not post:
             logging.warning("Suspicious request: {}".format(self.request))
             self.error(400)
 
-        change_operation = (edit is not None) or (delete is not None)
+        change_operation = edit or delete
         post_change_allowed = post.author.id() == current_user_id
-
         if change_operation and not post_change_allowed:
             logging.warning("User {} tried to change post {}".format(
                 current_user_id, post_id))
             return self.error(403)
 
-        score_operation = (like is not None) or (unlike is not None)
+        score_operation = like or unlike
         post_score_allowed = post.author.id() != current_user_id
         if score_operation and not post_score_allowed:
             logging.warning("User {} tried to like/unlike post {}".format(
                 current_user_id, post_id))
             return self.error(403)
 
-        if like is not None:
+        if like:
             Vote.like_post(post.key, self.user.key)
             self.redirect(self.uri_for("permalink", post_id=post_id))
-        elif unlike is not None:
+        elif unlike:
             Vote.dislike_post(post.key, self.user.key)
             self.redirect(self.uri_for("permalink", post_id=post_id))
-        elif edit is not None:
+        elif edit:
             self.redirect(self.uri_for("post_edit", post_id=post_id))
-        elif delete is not None:
+        elif delete:
             post.key.delete()
             self.redirect(self.uri_for("home"))
         else:
