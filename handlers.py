@@ -3,6 +3,7 @@ import re
 from blog_handler import BlogHandler, BlogRegisteredOnlyHandler
 from post import Post
 from user import User
+from vote import Vote
 
 
 class HomePage(BlogHandler):
@@ -103,38 +104,62 @@ class PostEditPage(NewPostPage):
 
 class PostPermalinkPage(BlogHandler):
     """Displays a single blog post"""
+
+    def post_score(self, post_key):
+        return Vote.score(post_key)
+
     def get(self, post_id):
         post = Post.get_by_id(int(post_id))
         if not post:
             self.error(404)
         else:
             author = User.get_by_id(post.author.id())
-            self.render("post_permalink.html", post=post, author=author)
+            self.render("post_permalink.html",
+                        post=post, author=author,
+                        post_score=self.post_score(post.key))
 
     def post(self, post_id):
         edit = self.request.get('post-edit', None)
         delete = self.request.get('post-delete', None)
+        like = self.request.get('post-like', None)
+        unlike = self.request.get('post-unlike', None)
 
         post = Post.get_by_id(int(post_id))
         current_user_id = self.user.key.id()
+        logging.warning(self.request)
 
         if not post:
-            logging.warning("Suspicious request: " + str(self.request))
+            logging.warning("Suspicious request: {}".format(self.request))
             self.error(400)
 
-        if post.author.id() != current_user_id:
+        change_operation = (edit is not None) or (delete is not None)
+        post_change_allowed = post.author.id() == current_user_id
+
+        if change_operation and not post_change_allowed:
             logging.warning("User {} tried to change post {}".format(
-                current_user_id,
-                post_id))
+                current_user_id, post_id))
             return self.error(403)
 
-        if edit is not None:
+        score_operation = (like is not None) or (unlike is not None)
+        post_score_allowed = post.author.id() != current_user_id
+        if score_operation and not post_score_allowed:
+            logging.warning("User {} tried to like/unlike post {}".format(
+                current_user_id, post_id))
+            return self.error(403)
+
+        if like is not None:
+            Vote.like_post(post.key, self.user.key)
+            self.redirect(self.uri_for("permalink", post_id=post_id))
+        elif unlike is not None:
+            Vote.dislike_post(post.key, self.user.key)
+            self.redirect(self.uri_for("permalink", post_id=post_id))
+        elif edit is not None:
             self.redirect(self.uri_for("post_edit", post_id=post_id))
         elif delete is not None:
             post.key.delete()
             self.redirect(self.uri_for("home"))
         else:
-            logging.warning("Suspicious request: " + str(self.request))
+            logging.warning("Suspicious request: {}".format(self.request))
             self.error(400)
 
 
