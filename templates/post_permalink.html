@@ -5,25 +5,29 @@
     {{ post.render(True) | safe }}
     {% if user: %}
     <div class="post-footer">
-        <form method="post">
+        <form method="post" class="row">
             <input type="hidden" name="post_id" value="{{post.key.id()}}">
-            <button type="submit" name="post-like" class="btn btn-default">
-                <span class="glyphicon glyphicon-thumbs-up"></span>
-                Like post
-            </button>
-            {{ post_score }}
-            <button type="submit" name="post-unlike" class="btn btn-default">
-                <span class="glyphicon glyphicon-thumbs-down"></span>
-                Unlike post
-            </button>
-            <button type="submit" name="post-edit" class="btn btn-default">
-                <span class="glyphicon glyphicon-edit"></span>
-                Edit post
-            </button>
-            <button type="submit" name="post-delete" class="btn btn-danger">
-                <span class="glyphicon glyphicon-remove-circle"></span>
-                Delete post
-            </button>
+            <div class="col-xs-3">
+                <button type="submit" name="post-like" class="btn btn-default">
+                    <span class="glyphicon glyphicon-thumbs-up"></span>
+                    <span class="sr-only">Like post</span>
+                </button>
+                {{ post_score }}
+                <button type="submit" name="post-unlike" class="btn btn-default">
+                    <span class="glyphicon glyphicon-thumbs-down"></span>
+                    <span class="sr-only">Unlike post</span>
+                </button>
+            </div>
+            <div class="col-xs-9 text-right">
+                <button type="submit" name="post-edit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-edit"></span>
+                    Edit post
+                </button>
+                <button type="submit" name="post-delete" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                    Delete post
+                </button>
+            </div>
         </form>
     </div>
     {% endif %}
