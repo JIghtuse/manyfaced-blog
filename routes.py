@@ -1,6 +1,7 @@
 import webapp2
 from handlers import HomePage, NewPostPage, PostPermalinkPage
 from handlers import WelcomePage, SignupPage, LoginPage, LogoutHandler
+from handlers import PostEditPage
 
 COMMON_ROUTES = [
     webapp2.Route('/', HomePage, name="home"),
@@ -12,4 +13,5 @@ COMMON_ROUTES = [
     webapp2.Route('/blog/signup', SignupPage, name="signup"),
     webapp2.Route('/blog/login', LoginPage, name="login"),
     webapp2.Route('/blog/logout', LogoutHandler, name="logout"),
+    webapp2.Route('/blog/edit/<post_id:\d+>', PostEditPage, name="post_edit"),
 ]

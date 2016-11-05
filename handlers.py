@@ -20,27 +20,85 @@ class NewPostPage(BlogRegisteredOnlyHandler):
     def get(self):
         self.render_page()
 
+    def form_is_valid(self, title, content):
+        """Validates form input.
+        Returns (True, None) if input is valid,
+        Returns (False, parameters to pass to template) if input is invalid"""
+        params = dict(title=title, content=content)
+        invalid_input = False
+
+        if not title:
+            params['post_title_error'] = "Post title cannot be empty"
+            invalid_input = True
+        if not content:
+            params['post_content_error'] = "Post content cannot be empty"
+            invalid_input = True
+
+        if invalid_input:
+            return False, params
+        else:
+            return True, None
+
     def post(self):
         title = self.request.get('title')
         content = self.request.get('content')
-        params = dict(title=title, content=content)
 
-        if content and title:
+        valid_input, params = self.form_is_valid(title, content)
+        if valid_input:
             # Creating a post
             post = Post(content=content, title=title,
                         author=self.user.key)
             post.put()
 
-            # Redirecting to post permalink page
             post_id = post.key.id()
             self.redirect(self.uri_for("permalink", post_id=str(post_id)))
         else:
-            # Showing errors
-            if not title:
-                params['post_title_error'] = "Post title cannot be empty"
-            if not content:
-                params['post_content_error'] = "Post content cannot be empty"
             self.render_page(**params)
+
+
+class PostEditPage(NewPostPage):
+    """Displays form to edit posts"""
+
+    def current_user_has_permissions(self, post_id):
+        post = Post.get_by_id(post_id)
+        current_user_id = self.user.key.id()
+        has_permissions = post.author.id() == current_user_id
+        if not has_permissions:
+            logging.warning("User {} tried to change post {}".format(
+                current_user_id, post_id))
+        return has_permissions
+
+    def get(self, post_id):
+        post_id_int = int(post_id)
+        post = Post.get_by_id(post_id_int)
+        if not post:
+            return self.error(404)
+
+        if not self.current_user_has_permissions(post_id_int):
+            return self.error(403)
+
+        self.render_page(post_id=post_id,
+                         title=post.title, content=post.content)
+
+    def post(self, post_id):
+        post_id_int = int(post_id)
+        post = Post.get_by_id(post_id_int)
+        if not post:
+            return self.error(404)
+
+        if not self.current_user_has_permissions(post_id_int):
+            return self.error(403)
+
+        title = self.request.get('title')
+        content = self.request.get('content')
+        valid_input, params = self.form_is_valid(title, content)
+        if not valid_input:
+            return self.render_page(**params)
+
+        post.content = content
+        post.title = title
+        post.put()
+        self.redirect(self.uri_for("permalink", post_id=post_id))
 
 
 class PostPermalinkPage(BlogHandler):
@@ -71,7 +129,7 @@ class PostPermalinkPage(BlogHandler):
             return self.error(403)
 
         if edit is not None:
-            self.write("editing post")
+            self.redirect(self.uri_for("post_edit", post_id=post_id))
         elif delete is not None:
             post.key.delete()
             self.redirect(self.uri_for("home"))
