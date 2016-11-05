@@ -73,7 +73,8 @@ class PostPermalinkPage(BlogHandler):
         if edit is not None:
             self.write("editing post")
         elif delete is not None:
-            self.write("deleting post")
+            post.key.delete()
+            self.redirect(self.uri_for("home"))
         else:
             logging.warning("Suspicious request: " + str(self.request))
             self.error(400)
