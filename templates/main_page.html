@@ -10,15 +10,7 @@
         <form method="post" class="row">
             <input type="hidden" name="post_id" value="{{post.key.id()}}">
             <div class="col-xs-3">
-                <button type="submit" name="post-like" class="btn btn-default">
-                    <span class="glyphicon glyphicon-thumbs-up"></span>
-                    <span class="sr-only">Like post</span>
-                </button>
-                {{ post.score }}
-                <button type="submit" name="post-unlike" class="btn btn-default">
-                    <span class="glyphicon glyphicon-thumbs-down"></span>
-                    <span class="sr-only">Unlike post</span>
-                </button>
+                {% include "post_buttons_like_dislike.html" %}
             </div>
             <div class="col-xs-9 text-right"></div>
         </form>
