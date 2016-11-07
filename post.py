@@ -47,7 +47,7 @@ class Post(ndb.Model):
 
 
 class Vote(ndb.Model):
-    """Models post in a blog with title, content, and creation date"""
+    """Models vote for a blog post"""
     user = ndb.KeyProperty(kind=User, required=True)
     post = ndb.KeyProperty(kind=Post, required=True)
     like = ndb.BooleanProperty(default=False, required=True, indexed=True)
