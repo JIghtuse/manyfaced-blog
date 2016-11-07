@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post" id="post-form">
+    <input type="hidden" name="post_id" value="{{post_id}}">
+    <div>
+        <label for="comment-text">Content</label>
+        <textarea id="comment-text", name="comment-text" class="form-control" rows="10">{{content}}</textarea>
+        {% if comment_error: %}
+        <div class="alert alert-danger">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            {{comment_error}}
+        </div>
+        {% endif %}
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary">
+            <span class="glyphicon glyphicon-send"></span> Send
+        </button>
+    </div>
+</form>
+{% endblock %}
