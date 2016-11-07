@@ -32,3 +32,13 @@ h1 {
     background-color: #eee;
     border-radius: 10px;
 }
+
+.post-comment {
+    border-radius: 10px;
+    background-color: #ddd;
+    margin-bottom: 0.5em;
+}
+
+.comment-list {
+    padding: 1em;
+}

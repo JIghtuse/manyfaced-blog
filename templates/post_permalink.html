@@ -24,4 +24,37 @@
     </div>
     {% endif %}
 </article>
+
+<div class="comment-list">
+    {% for comment in post.get_comments(): %}
+    <div class="row">
+        <div class="col-xs-12 post-comment">
+            {{ comment.content }}
+            -
+            {{ comment.user.get().name }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="comment-form row">
+    <form method="post">
+        <input type="hidden" name="post_id" value="{{post.key.id()}}">
+        <div class="col-xs-12">
+            <label for="post-comment-field">Comment</label>
+            <textarea id="post-comment-field", name="post-comment-field" class="form-control" rows="5">{{content}}</textarea>
+            {% if post_comment_error: %}
+            <div class="alert alert-danger">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                {{post_comment_error}}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-xs-12">
+            <button type="submit" class="btn btn-primary">
+                <span class="glyphicon glyphicon-send"></span> Send
+            </button>
+        </div>
+    </form>
+</div>
 {% endblock %}

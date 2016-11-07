@@ -45,6 +45,9 @@ class Post(ndb.Model):
         self.make_vote(user_key, dislike=True)
         self.recalculate_score()
 
+    def get_comments(self):
+        return Comment.query(Comment.post == self.key).order(Comment.creation_date)
+
 
 class Vote(ndb.Model):
     """Models vote for a blog post"""
@@ -52,3 +55,11 @@ class Vote(ndb.Model):
     post = ndb.KeyProperty(kind=Post, required=True)
     like = ndb.BooleanProperty(default=False, required=True, indexed=True)
     dislike = ndb.BooleanProperty(default=False, required=True, indexed=True)
+
+
+class Comment(ndb.Model):
+    """Models comment for a blog post"""
+    user = ndb.KeyProperty(kind=User, required=True)
+    post = ndb.KeyProperty(kind=Post, required=True)
+    content = ndb.TextProperty(required=True)
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)

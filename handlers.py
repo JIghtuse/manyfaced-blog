@@ -1,7 +1,7 @@
 import logging
 import re
 from blog_handler import BlogHandler, BlogRegisteredOnlyHandler
-from post import Post
+from post import Post, Comment
 from user import User
 
 
@@ -177,11 +177,20 @@ class PostPermalinkPage(BlogHandler):
             self.render("post_permalink.html",
                         post=post, author=author)
 
+    def add_comment(self, post, text):
+        if not self.user:
+            return self.redirect(self.uri_for("signup"))
+        comment = Comment(user=self.user.key, post=post.key,
+                          content=text)
+        comment.put()
+        self.redirect(self.request.url)
+
     def post(self, post_id):
         edit = self.request.get('post-edit', None) is not None
         delete = self.request.get('post-delete', None) is not None
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
+        comment = self.request.get('post-comment-field', "")
 
         post, post_id = get_post_by_form_id(self)
 
@@ -189,6 +198,8 @@ class PostPermalinkPage(BlogHandler):
             return make_vote(self, post, like, unlike)
         elif edit or delete:
             return make_change(self, post, edit, delete)
+        elif comment:
+            return self.add_comment(post, comment)
         else:
             logging.warning("Suspicious request (no user action): {}".format(self.request))
             return self.error(400)
