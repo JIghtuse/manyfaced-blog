@@ -177,20 +177,12 @@ class PostPermalinkPage(BlogHandler):
             self.render("post_permalink.html",
                         post=post, author=author)
 
-    def add_comment(self, post, text):
-        if not self.user:
-            return self.redirect(self.uri_for("signup"))
-        comment = Comment(user=self.user.key, post=post.key,
-                          content=text)
-        comment.put()
-        self.redirect(self.request.url)
-
     def post(self, post_id):
         edit = self.request.get('post-edit', None) is not None
         delete = self.request.get('post-delete', None) is not None
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
-        comment = self.request.get('post-comment-field', "")
+        comment = self.request.get('post-comment', None) is not None
 
         post, post_id = get_post_by_form_id(self)
 
@@ -199,10 +191,50 @@ class PostPermalinkPage(BlogHandler):
         elif edit or delete:
             return make_change(self, post, edit, delete)
         elif comment:
-            return self.add_comment(post, comment)
+            return self.redirect(self.uri_for('newcomment', post_id=post_id))
         else:
             logging.warning("Suspicious request (no user action): {}".format(self.request))
             return self.error(400)
+
+
+class NewCommentPage(BlogRegisteredOnlyHandler):
+    """Displays form to submit new posts"""
+    def render_page(self, **kw):
+        self.render("new_comment.html", **kw)
+
+    def get(self, post_id):
+        if not post_id:
+            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            return self.error(400)
+        post = Post.get_by_id(int(post_id))
+        if not post:
+            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            return self.error(400)
+
+        self.render_page()
+
+    def post(self, post_id):
+        text = self.request.get('comment-text')
+        params = dict(comment_text=text)
+
+        if not post_id:
+            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            return self.error(400)
+        post = Post.get_by_id(int(post_id))
+        if not post:
+            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            return self.error(400)
+
+        if text:
+            # Creating comment
+            comment = Comment(user=self.user.key, post=post.key, content=text)
+            comment.put()
+
+            post_id = post.key.id()
+            self.redirect(self.uri_for("permalink", post_id=post_id))
+        else:
+            params['comment_error'] = "Comment cannot be empty"
+            self.render_page(**params)
 
 
 class WelcomePage(BlogRegisteredOnlyHandler):

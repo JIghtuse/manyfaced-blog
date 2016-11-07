@@ -1,7 +1,7 @@
 import webapp2
 from handlers import HomePage, NewPostPage, PostPermalinkPage
 from handlers import WelcomePage, SignupPage, LoginPage, LogoutHandler
-from handlers import PostEditPage
+from handlers import PostEditPage, NewCommentPage
 
 COMMON_ROUTES = [
     webapp2.Route('/', HomePage, name="home"),
@@ -9,6 +9,7 @@ COMMON_ROUTES = [
     webapp2.Route('/blog/', HomePage, name="home"),
     webapp2.Route('/blog/<post_id:\d+>', PostPermalinkPage, name="permalink"),
     webapp2.Route('/blog/newpost', NewPostPage, name="newpost"),
+    webapp2.Route('/blog/<post_id:\d+>/newcomment', NewCommentPage, name="newcomment"),
     webapp2.Route('/blog/welcome', WelcomePage, name="welcome"),
     webapp2.Route('/blog/signup', SignupPage, name="signup"),
     webapp2.Route('/blog/login', LoginPage, name="login"),

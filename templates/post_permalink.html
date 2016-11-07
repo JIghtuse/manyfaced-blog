@@ -7,10 +7,10 @@
     <div class="post-footer">
         <form method="post" class="row">
             <input type="hidden" name="post_id" value="{{post.key.id()}}">
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 {% include "post_buttons_like_dislike.html" %}
             </div>
-            <div class="col-xs-9 text-right">
+            <div class="col-xs-6 text-right">
                 <button type="submit" name="post-edit" class="btn btn-default">
                     <span class="glyphicon glyphicon-edit"></span>
                     Edit post
@@ -35,26 +35,5 @@
         </div>
     </div>
     {% endfor %}
-</div>
-
-<div class="comment-form row">
-    <form method="post">
-        <input type="hidden" name="post_id" value="{{post.key.id()}}">
-        <div class="col-xs-12">
-            <label for="post-comment-field">Comment</label>
-            <textarea id="post-comment-field", name="post-comment-field" class="form-control" rows="5">{{content}}</textarea>
-            {% if post_comment_error: %}
-            <div class="alert alert-danger">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                {{post_comment_error}}
-            </div>
-            {% endif %}
-        </div>
-        <div class="col-xs-12">
-            <button type="submit" class="btn btn-primary">
-                <span class="glyphicon glyphicon-send"></span> Send
-            </button>
-        </div>
-    </form>
 </div>
 {% endblock %}

@@ -9,10 +9,10 @@
     <div class="post-footer">
         <form method="post" class="row">
             <input type="hidden" name="post_id" value="{{post.key.id()}}">
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 {% include "post_buttons_like_dislike.html" %}
             </div>
-            <div class="col-xs-9 text-right"></div>
+            <div class="col-xs-6 text-right"></div>
         </form>
     </div>
     {% endif %}
