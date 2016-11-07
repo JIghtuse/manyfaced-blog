@@ -3,7 +3,6 @@ import re
 from blog_handler import BlogHandler, BlogRegisteredOnlyHandler
 from post import Post
 from user import User
-from vote import Vote
 
 
 class HomePage(BlogHandler):
@@ -11,6 +10,42 @@ class HomePage(BlogHandler):
     def get(self):
         posts = Post.query().order(-Post.creation_date).fetch(limit=10)
         self.render("main_page.html", posts=posts)
+
+    def post(self):
+        post_id = self.request.get('post_id', None)
+        like = self.request.get('post-like', None) is not None
+        unlike = self.request.get('post-unlike', None) is not None
+
+        if post_id is None:
+            logging.warning("Suspicious request: {}".format(self.request))
+            self.error(400)
+
+        post = Post.get_by_id(int(post_id))
+        if not self.user:
+            return self.redirect(self.uri_for("signup"))
+        current_user_id = self.user.key.id()
+
+        if not post:
+            logging.warning("Suspicious request: {}".format(self.request))
+            self.error(400)
+
+        score_operation = like or unlike
+        post_score_allowed = post.author.id() != current_user_id
+        if score_operation and not post_score_allowed:
+            logging.warning("User {} tried to like/unlike post {}".format(
+                current_user_id, post_id))
+            return self.error(403)
+
+        if like:
+            post.like(self.user.key)
+            self.redirect(self.uri_for("home"))
+        elif unlike:
+            post.dislike(self.user.key)
+            self.redirect(self.uri_for("home"))
+        else:
+            logging.warning("Suspicious request: {}".format(self.request))
+            self.error(400)
+
 
 
 class NewPostPage(BlogRegisteredOnlyHandler):
@@ -105,9 +140,6 @@ class PostEditPage(NewPostPage):
 class PostPermalinkPage(BlogHandler):
     """Displays a single blog post"""
 
-    def post_score(self, post_key):
-        return Vote.score(post_key)
-
     def get(self, post_id):
         post = Post.get_by_id(int(post_id))
         if not post:
@@ -115,8 +147,7 @@ class PostPermalinkPage(BlogHandler):
         else:
             author = User.get_by_id(post.author.id())
             self.render("post_permalink.html",
-                        post=post, author=author,
-                        post_score=self.post_score(post.key))
+                        post=post, author=author)
 
     def post(self, post_id):
         edit = self.request.get('post-edit', None) is not None
@@ -125,6 +156,8 @@ class PostPermalinkPage(BlogHandler):
         unlike = self.request.get('post-unlike', None) is not None
 
         post = Post.get_by_id(int(post_id))
+        if not self.user:
+            return self.redirect(self.uri_for("signup"))
         current_user_id = self.user.key.id()
 
         if not post:
@@ -146,10 +179,10 @@ class PostPermalinkPage(BlogHandler):
             return self.error(403)
 
         if like:
-            Vote.like_post(post.key, self.user.key)
+            post.like(self.user.key)
             self.redirect(self.uri_for("permalink", post_id=post_id))
         elif unlike:
-            Vote.dislike_post(post.key, self.user.key)
+            post.dislike(self.user.key)
             self.redirect(self.uri_for("permalink", post_id=post_id))
         elif edit:
             self.redirect(self.uri_for("post_edit", post_id=post_id))
