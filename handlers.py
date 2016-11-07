@@ -5,6 +5,58 @@ from post import Post
 from user import User
 
 
+def get_post_by_form_id(self):
+    post_id = self.request.get('post_id', None)
+    if post_id is None:
+        logging.warning("Suspicious request: {}".format(self.request))
+        return None, None
+    post = Post.get_by_id(int(post_id))
+    return post, post_id
+
+
+def make_vote(self, post, like, unlike):
+    if post is None:
+        logging.warning("Suspicious request (no post): {}".format(self.request))
+        return self.error(400)
+    if like and unlike:
+        logging.warning("Suspicious request (like and unlike): {}".format(self.request))
+        return self.error(400)
+
+    if not self.user:
+        return self.redirect(self.uri_for("signup"))
+
+    if post.author.id() != self.user.key.id():
+        if like:
+            post.like(self.user.key)
+            return self.redirect(self.request.url)
+        elif unlike:
+            post.dislike(self.user.key)
+            return self.redirect(self.request.url)
+    logging.warning("Suspicious request (user votes for himself): {}".format(self.request))
+    return self.error(400)
+
+
+def make_change(self, post, edit, delete):
+    if post is None:
+        logging.warning("Suspicious request (no post): {}".format(self.request))
+        return self.error(400)
+    if edit and delete:
+        logging.warning("Suspicious request (edit and delete): {}".format(self.request))
+        return self.error(400)
+
+    if not self.user:
+        return self.redirect(self.uri_for("signup"))
+
+    if post.author.id() == self.user.key.id():
+        if edit:
+            return self.redirect(self.uri_for("post_edit", post_id=post.id))
+        elif delete:
+            post.key.delete()
+            return self.redirect(self.uri_for("home"))
+    logging.warning("Suspicious request (user changes post of another user): {}".format(self.request))
+    return self.error(400)
+
+
 class HomePage(BlogHandler):
     """Displays blog home page with posts"""
     def get(self):
@@ -12,40 +64,16 @@ class HomePage(BlogHandler):
         self.render("main_page.html", posts=posts)
 
     def post(self):
-        post_id = self.request.get('post_id', None)
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
 
-        if post_id is None:
-            logging.warning("Suspicious request: {}".format(self.request))
-            self.error(400)
+        post, post_id = get_post_by_form_id(self)
 
-        post = Post.get_by_id(int(post_id))
-        if not self.user:
-            return self.redirect(self.uri_for("signup"))
-        current_user_id = self.user.key.id()
-
-        if not post:
-            logging.warning("Suspicious request: {}".format(self.request))
-            self.error(400)
-
-        score_operation = like or unlike
-        post_score_allowed = post.author.id() != current_user_id
-        if score_operation and not post_score_allowed:
-            logging.warning("User {} tried to like/unlike post {}".format(
-                current_user_id, post_id))
-            return self.error(403)
-
-        if like:
-            post.like(self.user.key)
-            self.redirect(self.uri_for("home"))
-        elif unlike:
-            post.dislike(self.user.key)
-            self.redirect(self.uri_for("home"))
+        if like or unlike:
+            return make_vote(self, post, like, unlike)
         else:
             logging.warning("Suspicious request: {}".format(self.request))
-            self.error(400)
-
+            return self.error(400)
 
 
 class NewPostPage(BlogRegisteredOnlyHandler):
@@ -155,43 +183,15 @@ class PostPermalinkPage(BlogHandler):
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
 
-        post = Post.get_by_id(int(post_id))
-        if not self.user:
-            return self.redirect(self.uri_for("signup"))
-        current_user_id = self.user.key.id()
+        post, post_id = get_post_by_form_id(self)
 
-        if not post:
-            logging.warning("Suspicious request: {}".format(self.request))
-            self.error(400)
-
-        change_operation = edit or delete
-        post_change_allowed = post.author.id() == current_user_id
-        if change_operation and not post_change_allowed:
-            logging.warning("User {} tried to change post {}".format(
-                current_user_id, post_id))
-            return self.error(403)
-
-        score_operation = like or unlike
-        post_score_allowed = post.author.id() != current_user_id
-        if score_operation and not post_score_allowed:
-            logging.warning("User {} tried to like/unlike post {}".format(
-                current_user_id, post_id))
-            return self.error(403)
-
-        if like:
-            post.like(self.user.key)
-            self.redirect(self.uri_for("permalink", post_id=post_id))
-        elif unlike:
-            post.dislike(self.user.key)
-            self.redirect(self.uri_for("permalink", post_id=post_id))
-        elif edit:
-            self.redirect(self.uri_for("post_edit", post_id=post_id))
-        elif delete:
-            post.key.delete()
-            self.redirect(self.uri_for("home"))
+        if like or unlike:
+            return make_vote(self, post, like, unlike)
+        elif edit or delete:
+            return make_change(self, post, edit, delete)
         else:
             logging.warning("Suspicious request: {}".format(self.request))
-            self.error(400)
+            return self.error(400)
 
 
 class WelcomePage(BlogRegisteredOnlyHandler):
