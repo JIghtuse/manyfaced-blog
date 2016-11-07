@@ -8,7 +8,7 @@ from user import User
 def get_post_by_form_id(self):
     post_id = self.request.get('post_id', None)
     if post_id is None:
-        logging.warning("Suspicious request: {}".format(self.request))
+        logging.warning("Suspicious request (no post id): {}".format(self.request))
         return None, None
     post = Post.get_by_id(int(post_id))
     return post, post_id
@@ -72,7 +72,7 @@ class HomePage(BlogHandler):
         if like or unlike:
             return make_vote(self, post, like, unlike)
         else:
-            logging.warning("Suspicious request: {}".format(self.request))
+            logging.warning("Suspicious request (no user action): {}".format(self.request))
             return self.error(400)
 
 
@@ -190,7 +190,7 @@ class PostPermalinkPage(BlogHandler):
         elif edit or delete:
             return make_change(self, post, edit, delete)
         else:
-            logging.warning("Suspicious request: {}".format(self.request))
+            logging.warning("Suspicious request (no user action): {}".format(self.request))
             return self.error(400)
 
 
