@@ -1,0 +1,6 @@
+indexes:
+
+- kind: Comment
+  properties:
+  - name: post
+  - name: creation_date
