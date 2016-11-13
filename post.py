@@ -56,6 +56,10 @@ class Vote(ndb.Model):
     like = ndb.BooleanProperty(default=False, required=True, indexed=True)
     dislike = ndb.BooleanProperty(default=False, required=True, indexed=True)
 
+    def __repr__(self):
+        return "Vote({}, {}, {}, {})".format(self.user, self.post,
+                                             self.like, self.dislike)
+
 
 class Comment(ndb.Model):
     """Models comment for a blog post"""
