@@ -17,10 +17,10 @@ def get_post_by_form_id(self):
 def make_vote(self, post, like, unlike):
     if post is None:
         logging.warning("Suspicious request (no post): {}".format(self.request))
-        return self.error(400)
+        return self.abort(404, "Post does not exist")
     if like and unlike:
         logging.warning("Suspicious request (like and unlike): {}".format(self.request))
-        return self.error(400)
+        return self.abort(400, "Liking and unliking simultaneosly forbidden")
 
     if not self.user:
         return self.redirect(self.uri_for("signup"))
@@ -33,16 +33,16 @@ def make_vote(self, post, like, unlike):
             post.dislike(self.user.key)
             return self.redirect(self.request.url)
     logging.warning("Suspicious request (user votes for himself): {}".format(self.request))
-    return self.error(400)
+    return self.abort(403, "Voting for yourself forbidden")
 
 
 def make_change(self, post, edit, delete):
     if post is None:
         logging.warning("Suspicious request (no post): {}".format(self.request))
-        return self.error(400)
+        return self.abort(404, "Post does not exist")
     if edit and delete:
         logging.warning("Suspicious request (edit and delete): {}".format(self.request))
-        return self.error(400)
+        return self.abort(400, "Edit and unliking simultaneosly forbidden")
 
     if not self.user:
         return self.redirect(self.uri_for("signup"))
@@ -54,7 +54,7 @@ def make_change(self, post, edit, delete):
             post.key.delete()
             return self.redirect(self.uri_for("home"))
     logging.warning("Suspicious request (user changes post of another user): {}".format(self.request))
-    return self.error(400)
+    return self.abort(403, "You cannot change other user posts")
 
 
 class HomePage(BlogHandler):
@@ -73,7 +73,7 @@ class HomePage(BlogHandler):
             return make_vote(self, post, like, unlike)
         else:
             logging.warning("Suspicious request (no user action): {}".format(self.request))
-            return self.error(400)
+            return self.abort(400, "No action in request")
 
 
 class NewPostPage(BlogRegisteredOnlyHandler):
@@ -136,10 +136,10 @@ class PostEditPage(NewPostPage):
         post_id_int = int(post_id)
         post = Post.get_by_id(post_id_int)
         if not post:
-            return self.error(404)
+            return self.abort(404, "Post does not exist")
 
         if not self.current_user_has_permissions(post_id_int):
-            return self.error(403)
+            return self.abort(403, "You cannot change other user posts")
 
         self.render_page(post_id=post_id,
                          title=post.title, content=post.content)
@@ -148,10 +148,10 @@ class PostEditPage(NewPostPage):
         post_id_int = int(post_id)
         post = Post.get_by_id(post_id_int)
         if not post:
-            return self.error(404)
+            return self.abort(404, "Editing non-existing post")
 
         if not self.current_user_has_permissions(post_id_int):
-            return self.error(403)
+            return self.abort(403, "You cannot change other user posts")
 
         title = self.request.get('title')
         content = self.request.get('content')
@@ -171,7 +171,7 @@ class PostPermalinkPage(BlogHandler):
     def get(self, post_id):
         post = Post.get_by_id(int(post_id))
         if not post:
-            self.error(404)
+            return self.abort(404, "Post does not exist")
         else:
             author = User.get_by_id(post.author.id())
             self.render("post_permalink.html",
@@ -194,7 +194,7 @@ class PostPermalinkPage(BlogHandler):
             return self.redirect(self.uri_for('newcomment', post_id=post_id))
         else:
             logging.warning("Suspicious request (no user action): {}".format(self.request))
-            return self.error(400)
+            return self.abort(400, "No action in request")
 
 
 class NewCommentPage(BlogRegisteredOnlyHandler):
@@ -205,11 +205,11 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
     def get(self, post_id):
         if not post_id:
             logging.warning("Suspicious request (no post id): {}".format(self.request))
-            return self.error(400)
+            return self.abort(400, "No post requested")
         post = Post.get_by_id(int(post_id))
         if not post:
-            logging.warning("Suspicious request (no post id): {}".format(self.request))
-            return self.error(400)
+            logging.warning("Suspicious request (no post): {}".format(self.request))
+            return self.abort(404, "Post does not exist")
 
         self.render_page()
 
@@ -219,11 +219,11 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
 
         if not post_id:
             logging.warning("Suspicious request (no post id): {}".format(self.request))
-            return self.error(400)
+            return self.abort(400, "No post requested")
         post = Post.get_by_id(int(post_id))
         if not post:
             logging.warning("Suspicious request (no post id): {}".format(self.request))
-            return self.error(400)
+            return self.abort(404, "Post does not exist")
 
         if text:
             # Creating comment
