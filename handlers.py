@@ -49,7 +49,7 @@ def make_change(self, post, edit, delete):
 
     if post.author.id() == self.user.key.id():
         if edit:
-            return self.redirect(self.uri_for("post_edit", post_id=post.id))
+            return self.redirect(self.uri_for("post_edit", post_id=post.key.id()))
         elif delete:
             post.key.delete()
             return self.redirect(self.uri_for("home"))
