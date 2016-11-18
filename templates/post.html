@@ -1,6 +1,6 @@
 <div class="post-header row">
-    <div class="col-xs-9">
-        <h2 class="post-title">
+    <div class="post-title col-xs-9">
+        <h2>
             {% if permalink: %}
             {{ post.title }}
             {% else %}
@@ -8,8 +8,8 @@
             {% endif %}
         </h2>
     </div>
-    <div class="col-xs-3">
-    {{ post.creation_date.strftime("%d %B %Y") }}
+    <div class="post-title-date col-xs-3">
+    {{ post.creation_date.strftime("%d %b %Y") }}
     by {{ author }}
     </div>
 </div>
