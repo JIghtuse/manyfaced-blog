@@ -41,13 +41,19 @@ h1 {
 }
 
 .post-comment {
-    border-radius: 10px;
-    background-color: #ddd;
     margin-bottom: 0.5em;
+}
+
+.comments-title {
+    font-family: 'Cinzel Decorative', cursive;
+    text-align: center;
+    border-bottom: 1px solid #000;
 }
 
 .comment-list {
     padding: 1em;
+    background-color: #eee;
+    border-radius: 10px;
 }
 
 footer {
