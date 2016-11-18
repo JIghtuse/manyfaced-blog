@@ -15,16 +15,15 @@ class Post(ndb.Model):
 
     def render(self, permalink=False):
         author = User.get_by_id(self.author.id())
-        return BlogHandler.render_template("post.html", post=self,
-                                           author=author.name,
-                                           permalink=permalink)
+        return BlogHandler.render_template(
+            "post.html", post=self, author=author.name, permalink=permalink)
 
     def make_vote(self, user_key, like=False, dislike=False):
         vote = Vote.query().filter(Vote.post == self.key,
                                    Vote.user == user_key).get()
         if vote is None:
-            vote = Vote(user=user_key, post=self.key,
-                        like=like, dislike=dislike)
+            vote = Vote(
+                user=user_key, post=self.key, like=like, dislike=dislike)
         else:
             vote.like = like
             vote.dislike = dislike
@@ -46,7 +45,8 @@ class Post(ndb.Model):
         self.recalculate_score()
 
     def get_comments(self):
-        return Comment.query(Comment.post == self.key).order(Comment.creation_date)
+        return Comment.query(
+            Comment.post == self.key).order(Comment.creation_date)
 
 
 class Vote(ndb.Model):
@@ -57,8 +57,8 @@ class Vote(ndb.Model):
     dislike = ndb.BooleanProperty(default=False, required=True, indexed=True)
 
     def __repr__(self):
-        return "Vote({}, {}, {}, {})".format(self.user, self.post,
-                                             self.like, self.dislike)
+        return "Vote({}, {}, {}, {})".format(self.user, self.post, self.like,
+                                             self.dislike)
 
 
 class Comment(ndb.Model):

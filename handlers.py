@@ -8,7 +8,8 @@ from user import User
 def get_post_by_form_id(self):
     post_id = self.request.get('post_id', None)
     if post_id is None:
-        logging.warning("Suspicious request (no post id): {}".format(self.request))
+        logging.warning("Suspicious request (no post id): {}".format(
+            self.request))
         return None, None
     post = Post.get_by_id(int(post_id))
     return post, post_id
@@ -16,10 +17,12 @@ def get_post_by_form_id(self):
 
 def make_vote(self, post, like, unlike):
     if post is None:
-        logging.warning("Suspicious request (no post): {}".format(self.request))
+        logging.warning("Suspicious request (no post): {}".format(
+            self.request))
         return self.abort(404, "Post does not exist")
     if like and unlike:
-        logging.warning("Suspicious request (like and unlike): {}".format(self.request))
+        logging.warning("Suspicious request (like and unlike): {}".format(
+            self.request))
         return self.abort(400, "Liking and unliking simultaneosly forbidden")
 
     if not self.user:
@@ -32,16 +35,19 @@ def make_vote(self, post, like, unlike):
         elif unlike:
             post.dislike(self.user.key)
             return self.redirect(self.request.url)
-    logging.warning("Suspicious request (user votes for himself): {}".format(self.request))
+    logging.warning("Suspicious request (user votes for himself): {}".format(
+        self.request))
     return self.abort(403, "Voting for yourself forbidden")
 
 
 def make_change(self, post, edit, delete):
     if post is None:
-        logging.warning("Suspicious request (no post): {}".format(self.request))
+        logging.warning("Suspicious request (no post): {}".format(
+            self.request))
         return self.abort(404, "Post does not exist")
     if edit and delete:
-        logging.warning("Suspicious request (edit and delete): {}".format(self.request))
+        logging.warning("Suspicious request (edit and delete): {}".format(
+            self.request))
         return self.abort(400, "Edit and unliking simultaneosly forbidden")
 
     if not self.user:
@@ -49,16 +55,21 @@ def make_change(self, post, edit, delete):
 
     if post.author.id() == self.user.key.id():
         if edit:
-            return self.redirect(self.uri_for("post_edit", post_id=post.key.id()))
+            return self.redirect(
+                self.uri_for(
+                    "post_edit", post_id=post.key.id()))
         elif delete:
             post.key.delete()
             return self.redirect(self.uri_for("home"))
-    logging.warning("Suspicious request (user changes post of another user): {}".format(self.request))
+    logging.warning(
+        "Suspicious request (user changes post of another user): {}".format(
+            self.request))
     return self.abort(403, "You cannot change other user posts")
 
 
 class HomePage(BlogHandler):
     """Displays blog home page with posts"""
+
     def get(self):
         posts = Post.query().order(-Post.creation_date).fetch(limit=10)
         self.render("main_page.html", posts=posts)
@@ -72,12 +83,14 @@ class HomePage(BlogHandler):
         if like or unlike:
             return make_vote(self, post, like, unlike)
         else:
-            logging.warning("Suspicious request (no user action): {}".format(self.request))
+            logging.warning("Suspicious request (no user action): {}".format(
+                self.request))
             return self.abort(400, "No action in request")
 
 
 class NewPostPage(BlogRegisteredOnlyHandler):
     """Displays form to submit new posts"""
+
     def render_page(self, **kw):
         self.render("new_post.html", **kw)
 
@@ -110,8 +123,7 @@ class NewPostPage(BlogRegisteredOnlyHandler):
         valid_input, params = self.form_is_valid(title, content)
         if valid_input:
             # Creating a post
-            post = Post(content=content, title=title,
-                        author=self.user.key)
+            post = Post(content=content, title=title, author=self.user.key)
             post.put()
 
             post_id = post.key.id()
@@ -141,8 +153,8 @@ class PostEditPage(NewPostPage):
         if not self.current_user_has_permissions(post_id_int):
             return self.abort(403, "You cannot change other user posts")
 
-        self.render_page(post_id=post_id,
-                         title=post.title, content=post.content)
+        self.render_page(
+            post_id=post_id, title=post.title, content=post.content)
 
     def post(self, post_id):
         post_id_int = int(post_id)
@@ -174,8 +186,7 @@ class PostPermalinkPage(BlogHandler):
             return self.abort(404, "Post does not exist")
         else:
             author = User.get_by_id(post.author.id())
-            self.render("post_permalink.html",
-                        post=post, author=author)
+            self.render("post_permalink.html", post=post, author=author)
 
     def post(self, post_id):
         edit = self.request.get('post-edit', None) is not None
@@ -193,22 +204,26 @@ class PostPermalinkPage(BlogHandler):
         elif comment:
             return self.redirect(self.uri_for('newcomment', post_id=post_id))
         else:
-            logging.warning("Suspicious request (no user action): {}".format(self.request))
+            logging.warning("Suspicious request (no user action): {}".format(
+                self.request))
             return self.abort(400, "No action in request")
 
 
 class NewCommentPage(BlogRegisteredOnlyHandler):
     """Displays form to submit new posts"""
+
     def render_page(self, **kw):
         self.render("new_comment.html", **kw)
 
     def get(self, post_id):
         if not post_id:
-            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            logging.warning("Suspicious request (no post id): {}".format(
+                self.request))
             return self.abort(400, "No post requested")
         post = Post.get_by_id(int(post_id))
         if not post:
-            logging.warning("Suspicious request (no post): {}".format(self.request))
+            logging.warning("Suspicious request (no post): {}".format(
+                self.request))
             return self.abort(404, "Post does not exist")
 
         self.render_page()
@@ -218,11 +233,13 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
         params = dict(comment_text=text)
 
         if not post_id:
-            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            logging.warning("Suspicious request (no post id): {}".format(
+                self.request))
             return self.abort(400, "No post requested")
         post = Post.get_by_id(int(post_id))
         if not post:
-            logging.warning("Suspicious request (no post id): {}".format(self.request))
+            logging.warning("Suspicious request (no post id): {}".format(
+                self.request))
             return self.abort(404, "Post does not exist")
 
         if text:
@@ -239,6 +256,7 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
 
 class WelcomePage(BlogRegisteredOnlyHandler):
     """Displays greeting for logged in user"""
+
     def get(self):
         self.render("welcome.html", username=self.user.name)
 
@@ -300,8 +318,8 @@ class SignupPage(BlogHandler):
         verify = self.request.get('verify')
         email = self.request.get('email')
 
-        valid_input, params = self.form_is_valid(username, password,
-                                                 verify, email)
+        valid_input, params = self.form_is_valid(username, password, verify,
+                                                 email)
 
         if not valid_input:
             self.render("signup.html", **params)
