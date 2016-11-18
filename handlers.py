@@ -77,11 +77,14 @@ class HomePage(BlogHandler):
     def post(self):
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
+        comment = self.request.get('post-comment', None) is not None
 
         post, post_id = get_post_by_form_id(self)
 
         if like or unlike:
             return make_vote(self, post, like, unlike)
+        elif comment:
+            return self.redirect(self.uri_for('newcomment', post_id=post_id))
         else:
             logging.warning("Suspicious request (no user action): {}".format(
                 self.request))
