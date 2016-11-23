@@ -29,10 +29,21 @@
     <h3 class="comments-title">Comments</h3>
     {% for comment in post.get_comments(): %}
     <div class="row">
-        <div class="col-xs-12 post-comment">
-            {{ comment.content }}
-            -
-            {{ comment.user.get().name }}
+        <div class="comment">
+            <div class="col-xs-12 comment-author">{{ comment.user.get().name }} said:</div>
+            <div class="col-xs-12 comment-content">
+                <pre>{{ comment.content }}</pre>
+                <div class="comment-control-buttons">
+                    <button class="btn btn-default">
+                        <span class="glyphicon glyphicon-edit"></span>
+                        Edit
+                    </button>
+                    <button class="btn btn-danger">
+                        <span class="glyphicon glyphicon-remove-circle"></span>
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     {% endfor %}
