@@ -5,6 +5,10 @@ from post import Post, Comment
 from user import User
 
 
+def log_request(self, msg):
+    logging.warning("{}: {}".format(msg, self.request))
+
+
 def get_post_from_request(self, post_id=None):
     """Gets post corresponding to post_id or self.request['post_id']
     Returns (None, None) if there is no post_id or no post corresponding to it
@@ -12,8 +16,7 @@ def get_post_from_request(self, post_id=None):
     post_id = post_id or self.request.get('post_id')
     post_id = int(post_id)
     if post_id is None:
-        logging.warning("Suspicious request (no post id): {}".format(
-            self.request))
+        log_request(self, "Request with no post id")
         return None, None
     post = Post.get_by_id(int(post_id))
     if not post:
@@ -25,8 +28,7 @@ def make_vote(self, post, like, unlike):
     """Checks permissions and allows to like/unlike post if user has rights"""
 
     if like and unlike:
-        logging.warning("Suspicious request (like and unlike): {}".format(
-            self.request))
+        log_request(self, "Request with like & unlike")
         return self.abort(400, "Liking and unliking simultaneosly forbidden")
 
     if not self.user:
@@ -39,8 +41,7 @@ def make_vote(self, post, like, unlike):
         elif unlike:
             post.dislike(self.user.key)
             return self.redirect(self.request.url)
-    logging.warning("Suspicious request (user votes for himself): {}".format(
-        self.request))
+    log_request(self, "User votes for himself")
     return self.abort(403, "Voting for yourself forbidden")
 
 
@@ -48,8 +49,7 @@ def make_change(self, post, edit, delete):
     """Checks permissions and allows to edit/delete post if user has rights"""
 
     if edit and delete:
-        logging.warning("Suspicious request (edit and delete): {}".format(
-            self.request))
+        log_request(self, "Request with edit & delete post")
         return self.abort(400, "Edit and delete simultaneosly forbidden")
 
     if not self.user:
@@ -61,9 +61,7 @@ def make_change(self, post, edit, delete):
         elif delete:
             post.key.delete()
             return self.redirect_to_uri("home")
-    logging.warning(
-        "Suspicious request (user changes post of another user): {}".format(
-            self.request))
+    log_request(self, "User tried to change post of another user")
     return self.abort(403, "You cannot change other user posts")
 
 
@@ -71,7 +69,7 @@ def make_comment_change(self, comment_id, edit, delete):
     """Checks permissions and allows to edit/delete comment"""
 
     if edit and delete:
-        logging.warning("Forbidden edit and delete: {}".format(self.request))
+        log_request(self, "Request with edit & delete comment")
         return self.abort(400, "Edit and delete simultaneosly forbidden")
 
     if not self.user:
@@ -89,8 +87,7 @@ def make_comment_change(self, comment_id, edit, delete):
         elif delete:
             comment.key.delete()
             return self.redirect_to_uri("permalink", post_id=comment.post.id())
-    logging.warning("User forbidden to change comment: {}".format(
-        self.request))
+    log_request(self, "User tried to change comment of another user")
     return self.abort(403, "You cannot change other user comments")
 
 
@@ -115,8 +112,7 @@ class HomePage(BlogHandler):
         elif comment:
             return self.redirect_to_uri('newcomment', post_id=post_id)
         else:
-            logging.warning("Suspicious request (no user action): {}".format(
-                self.request))
+            log_request(self, "No user action")
             return self.abort(400, "No action in request")
 
 
@@ -247,8 +243,7 @@ class PostPermalinkPage(BlogHandler):
             return make_comment_change(self, comment_id,
                                        comment_edit, comment_delete)
         else:
-            logging.warning("Suspicious request (no user action): {}".format(
-                self.request))
+            log_request(self, "No user action")
             return self.abort(400, "No action in request")
 
 
