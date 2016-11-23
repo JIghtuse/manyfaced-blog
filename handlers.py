@@ -5,7 +5,10 @@ from post import Post, Comment
 from user import User
 
 
-def get_post_by_form_id(self):
+def get_post_from_request(self):
+    """Gets post corresponding to current request
+    Returns (None, None) if request has no post_id
+    Returns (post, post_id) if request has post_id"""
     post_id = self.request.get('post_id', None)
     if post_id is None:
         logging.warning("Suspicious request (no post id): {}".format(
@@ -16,6 +19,8 @@ def get_post_by_form_id(self):
 
 
 def make_vote(self, post, like, unlike):
+    """Checks permissions and allows to like/unlike post if user has rights"""
+
     if post is None:
         logging.warning("Suspicious request (no post): {}".format(
             self.request))
@@ -41,6 +46,8 @@ def make_vote(self, post, like, unlike):
 
 
 def make_change(self, post, edit, delete):
+    """Checks permissions and allows to edit/delete post if user has rights"""
+
     if post is None:
         logging.warning("Suspicious request (no post): {}".format(
             self.request))
@@ -48,7 +55,7 @@ def make_change(self, post, edit, delete):
     if edit and delete:
         logging.warning("Suspicious request (edit and delete): {}".format(
             self.request))
-        return self.abort(400, "Edit and unliking simultaneosly forbidden")
+        return self.abort(400, "Edit and delete simultaneosly forbidden")
 
     if not self.user:
         return self.redirect(self.uri_for("signup"))
@@ -79,7 +86,7 @@ class HomePage(BlogHandler):
         unlike = self.request.get('post-unlike', None) is not None
         comment = self.request.get('post-comment', None) is not None
 
-        post, post_id = get_post_by_form_id(self)
+        post, post_id = get_post_from_request(self)
 
         if like or unlike:
             return make_vote(self, post, like, unlike)
@@ -198,7 +205,7 @@ class PostPermalinkPage(BlogHandler):
         unlike = self.request.get('post-unlike', None) is not None
         comment = self.request.get('post-comment', None) is not None
 
-        post, post_id = get_post_by_form_id(self)
+        post, post_id = get_post_from_request(self)
 
         if like or unlike:
             return make_vote(self, post, like, unlike)
@@ -358,6 +365,7 @@ class LogoutHandler(BlogRegisteredOnlyHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
         self.redirect(self.uri_for("signup"))
+
 
 class CreditsPage(BlogHandler):
     def get(self):
