@@ -69,6 +69,35 @@ def make_change(self, post, edit, delete):
     return self.abort(403, "You cannot change other user posts")
 
 
+def make_comment_change(self, comment_id, edit, delete):
+    """Checks permissions and allows to edit/delete comment"""
+
+    if edit and delete:
+        logging.warning("Forbidden edit and delete: {}".format(self.request))
+        return self.abort(400, "Edit and delete simultaneosly forbidden")
+
+    if not self.user:
+        return self.redirect(self.uri_for("signup"))
+
+    comment = Comment.get_by_id(int(comment_id))
+    if not comment:
+        return self.abort(404, "No comment associated with request")
+
+    key = comment.key
+
+    if comment.user.id() == self.user.key.id():
+        if edit:
+            return self.redirect(self.uri_for("comment_edit",
+                                              comment_id=key.id()))
+        elif delete:
+            comment.key.delete()
+            return self.redirect(self.uri_for("permalink",
+                                              post_id=comment.post.id()))
+    logging.warning("User forbidden to change comment: {}".format(
+        self.request))
+    return self.abort(403, "You cannot change other user comments")
+
+
 class HomePage(BlogHandler):
     """Displays blog home page with posts"""
 
@@ -198,9 +227,15 @@ class PostPermalinkPage(BlogHandler):
     def post(self, post_id):
         edit = self.request.get('post-edit', None) is not None
         delete = self.request.get('post-delete', None) is not None
+
         like = self.request.get('post-like', None) is not None
         unlike = self.request.get('post-unlike', None) is not None
+
         comment = self.request.get('post-comment', None) is not None
+
+        comment_id = self.request.get('comment_id')
+        comment_edit = self.request.get('comment-edit', None) is not None
+        comment_delete = self.request.get('comment-delete', None) is not None
 
         post, post_id = get_post_from_request(self, post_id)
         if not post:
@@ -212,6 +247,9 @@ class PostPermalinkPage(BlogHandler):
             return make_change(self, post, edit, delete)
         elif comment:
             return self.redirect(self.uri_for('newcomment', post_id=post_id))
+        elif comment_id and (comment_edit or comment_delete):
+            return make_comment_change(self, comment_id,
+                                       comment_edit, comment_delete)
         else:
             logging.warning("Suspicious request (no user action): {}".format(
                 self.request))
@@ -243,6 +281,39 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
         if text:
             # Creating comment
             comment = Comment(user=self.user.key, post=post.key, content=text)
+            comment.put()
+
+            self.redirect(self.uri_for("permalink", post_id=post_id))
+        else:
+            params['comment_error'] = "Comment cannot be empty"
+            self.render_page(**params)
+
+
+class EditCommentPage(BlogRegisteredOnlyHandler):
+    """Displays form to submit new posts"""
+
+    def render_page(self, **kw):
+        self.render("new_comment.html", **kw)
+
+    def get(self, comment_id):
+        comment = Comment.get_by_id(int(comment_id))
+        if not comment:
+            return self.abort(404, "No comment associated with request")
+        self.render_page(post_id=comment.post.id(), content=comment.content)
+
+    def post(self, comment_id):
+        text = self.request.get('comment-text')
+        params = dict(comment_text=text)
+
+        comment = Comment.get_by_id(int(comment_id))
+        if not comment:
+            return self.abort(404, "No comment associated with request")
+
+        post_id = comment.post.id()
+        params['post_id'] = post_id
+
+        if text:
+            comment.content = text
             comment.put()
 
             self.redirect(self.uri_for("permalink", post_id=post_id))
