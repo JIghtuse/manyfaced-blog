@@ -357,3 +357,7 @@ class LogoutHandler(BlogRegisteredOnlyHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
         self.redirect(self.uri_for("signup"))
+
+class CreditsPage(BlogHandler):
+    def get(self):
+        self.render("credits.html")
