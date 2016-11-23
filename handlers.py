@@ -5,26 +5,25 @@ from post import Post, Comment
 from user import User
 
 
-def get_post_from_request(self):
-    """Gets post corresponding to current request
-    Returns (None, None) if request has no post_id
+def get_post_from_request(self, post_id=None):
+    """Gets post corresponding to post_id or self.request['post_id']
+    Returns (None, None) if there is no post_id or no post corresponding to it
     Returns (post, post_id) if request has post_id"""
-    post_id = self.request.get('post_id', None)
+    post_id = post_id or self.request.get('post_id')
+    post_id = int(post_id)
     if post_id is None:
         logging.warning("Suspicious request (no post id): {}".format(
             self.request))
         return None, None
     post = Post.get_by_id(int(post_id))
+    if not post:
+        return None, None
     return post, post_id
 
 
 def make_vote(self, post, like, unlike):
     """Checks permissions and allows to like/unlike post if user has rights"""
 
-    if post is None:
-        logging.warning("Suspicious request (no post): {}".format(
-            self.request))
-        return self.abort(404, "Post does not exist")
     if like and unlike:
         logging.warning("Suspicious request (like and unlike): {}".format(
             self.request))
@@ -48,10 +47,6 @@ def make_vote(self, post, like, unlike):
 def make_change(self, post, edit, delete):
     """Checks permissions and allows to edit/delete post if user has rights"""
 
-    if post is None:
-        logging.warning("Suspicious request (no post): {}".format(
-            self.request))
-        return self.abort(404, "Post does not exist")
     if edit and delete:
         logging.warning("Suspicious request (edit and delete): {}".format(
             self.request))
@@ -87,6 +82,8 @@ class HomePage(BlogHandler):
         comment = self.request.get('post-comment', None) is not None
 
         post, post_id = get_post_from_request(self)
+        if not post:
+            return self.abort(404, "No post associated with request")
 
         if like or unlike:
             return make_vote(self, post, like, unlike)
@@ -146,7 +143,9 @@ class PostEditPage(NewPostPage):
     """Displays form to edit posts"""
 
     def current_user_has_permissions(self, post_id):
-        post = Post.get_by_id(post_id)
+        post, post_id = get_post_from_request(self, post_id)
+        if not post:
+            return self.abort(404, "No post associated with request")
         current_user_id = self.user.key.id()
         has_permissions = post.author.id() == current_user_id
         if not has_permissions:
@@ -155,24 +154,22 @@ class PostEditPage(NewPostPage):
         return has_permissions
 
     def get(self, post_id):
-        post_id_int = int(post_id)
-        post = Post.get_by_id(post_id_int)
+        post, post_id = get_post_from_request(self, post_id)
         if not post:
-            return self.abort(404, "Post does not exist")
+            return self.abort(404, "No post associated with request")
 
-        if not self.current_user_has_permissions(post_id_int):
+        if not self.current_user_has_permissions(post_id):
             return self.abort(403, "You cannot change other user posts")
 
         self.render_page(
             post_id=post_id, title=post.title, content=post.content)
 
     def post(self, post_id):
-        post_id_int = int(post_id)
-        post = Post.get_by_id(post_id_int)
+        post, post_id = get_post_from_request(self, post_id)
         if not post:
-            return self.abort(404, "Editing non-existing post")
+            return self.abort(404, "No post associated with request")
 
-        if not self.current_user_has_permissions(post_id_int):
+        if not self.current_user_has_permissions(post_id):
             return self.abort(403, "You cannot change other user posts")
 
         title = self.request.get('title')
@@ -191,9 +188,9 @@ class PostPermalinkPage(BlogHandler):
     """Displays a single blog post"""
 
     def get(self, post_id):
-        post = Post.get_by_id(int(post_id))
+        post, post_id = get_post_from_request(self, post_id)
         if not post:
-            return self.abort(404, "Post does not exist")
+            return self.abort(404, "No post associated with request")
         else:
             author = User.get_by_id(post.author.id())
             self.render("post_permalink.html", post=post, author=author)
@@ -205,7 +202,9 @@ class PostPermalinkPage(BlogHandler):
         unlike = self.request.get('post-unlike', None) is not None
         comment = self.request.get('post-comment', None) is not None
 
-        post, post_id = get_post_from_request(self)
+        post, post_id = get_post_from_request(self, post_id)
+        if not post:
+            return self.abort(404, "No post associated with request")
 
         if like or unlike:
             return make_vote(self, post, like, unlike)
@@ -226,15 +225,9 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
         self.render("new_comment.html", **kw)
 
     def get(self, post_id):
-        if not post_id:
-            logging.warning("Suspicious request (no post id): {}".format(
-                self.request))
-            return self.abort(400, "No post requested")
-        post = Post.get_by_id(int(post_id))
+        post, post_id = get_post_from_request(self, post_id)
         if not post:
-            logging.warning("Suspicious request (no post): {}".format(
-                self.request))
-            return self.abort(404, "Post does not exist")
+            return self.abort(404, "No post associated with request")
 
         self.render_page(post_id=post_id)
 
@@ -242,16 +235,9 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
         text = self.request.get('comment-text')
         params = dict(comment_text=text)
 
-        if not post_id:
-            logging.warning("Suspicious request (no post id): {}".format(
-                self.request))
-            return self.abort(400, "No post requested")
-        post = Post.get_by_id(int(post_id))
+        post, post_id = get_post_from_request(self, post_id)
         if not post:
-            logging.warning("Suspicious request (no post id): {}".format(
-                self.request))
-            return self.abort(404, "Post does not exist")
-        post_id = post.key.id()
+            return self.abort(404, "No post associated with request")
         params['post_id'] = post_id
 
         if text:
