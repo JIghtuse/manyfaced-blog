@@ -33,6 +33,7 @@
             <div class="col-xs-12 comment-author">{{ comment.user.get().name }} said:</div>
             <div class="col-xs-12 comment-content">
                 <pre>{{ comment.content }}</pre>
+                {% if user: %}
                 <form method="post" class="comment-control-buttons">
                     <input type="hidden" name="comment_id" value="{{comment.key.id()}}">
                     <button name="comment-edit" class="btn btn-default">
@@ -44,6 +45,7 @@
                         Delete
                     </button>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
