@@ -6,7 +6,7 @@
 
     <div>
         <label for="username">Username</label>
-        <input type="text" name="username" value="{{username}}" id="username" class="form-control">
+        <input type="text" name="username" value="{{username}}" id="username" class="form-control" required>
         {% if username_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -17,7 +17,7 @@
 
     <div>
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control">
+        <input type="password" name="password" id="password" class="form-control" required>
         {% if password_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -28,7 +28,7 @@
 
     <div>
         <label for="verify">Verify Password</label>
-        <input type="password" name="verify" id="verify" class="form-control">
+        <input type="password" name="verify" id="verify" class="form-control" required>
         {% if verify_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>

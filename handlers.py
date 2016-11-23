@@ -229,7 +229,7 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
                 self.request))
             return self.abort(404, "Post does not exist")
 
-        self.render_page()
+        self.render_page(post_id=post_id)
 
     def post(self, post_id):
         text = self.request.get('comment-text')
@@ -244,13 +244,14 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
             logging.warning("Suspicious request (no post id): {}".format(
                 self.request))
             return self.abort(404, "Post does not exist")
+        post_id = post.key.id()
+        params['post_id'] = post_id
 
         if text:
             # Creating comment
             comment = Comment(user=self.user.key, post=post.key, content=text)
             comment.put()
 
-            post_id = post.key.id()
             self.redirect(self.uri_for("permalink", post_id=post_id))
         else:
             params['comment_error'] = "Comment cannot be empty"

@@ -20,12 +20,12 @@
                             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
                             <span class="sr-only">Toggle navigation</span>
                         </button>
-                        <a class="navbar-brand text-uppercase" href="/blog">Manyfaced</a>
+                        <a class="navbar-brand text-uppercase" href="{{uri_for('home')}}">Manyfaced</a>
                     </div>
                     <div class="collapse navbar-collapse" id="navbar">
                         <ul class="nav navbar-nav">
                             {% if user: %}
-                            <li><a href="/blog/newpost">
+                            <li><a href="{{uri_for('newpost')}}">
                                 <span class="glyphicon glyphicon-pencil"></span>
                                 New post</a>
                             </li>
@@ -33,8 +33,8 @@
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             {% if not user: %}
-                            <li><a href="/blog/signup">Signup</a></li>
-                            <li><a href="/blog/login">Login</a></li>
+                            <li><a href="{{uri_for('signup')}}">Signup</a></li>
+                            <li><a href="{{uri_for('login')}}">Login</a></li>
                             {% else: %}
                             <li>
                                 <a href="#">
@@ -42,7 +42,7 @@
                                     {{user.name}}
                                 </a>
                             </li>
-                            <li><a href="/blog/logout">Logout</a></li>
+                            <li><a href="{{uri_for('logout')}}">Logout</a></li>
                             {% endif %}
                         </ul>
                     </div>

@@ -5,7 +5,7 @@
     <input type="hidden" name="post_id" value="{{post_id}}">
     <div>
         <label for="post-title">Title</label>
-        <input type="text", id="post-title", name="title", value="{{title}}" class="form-control">
+        <input type="text", id="post-title", name="title", value="{{title}}" class="form-control" required>
         {% if post_title_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -15,7 +15,7 @@
     </div>
     <div>
         <label for="post-content">Content</label>
-        <textarea id="post-content", name="content" class="form-control" rows="10">{{content}}</textarea>
+        <textarea id="post-content", name="content" class="form-control" rows="10" required>{{content}}</textarea>
         {% if post_content_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -24,6 +24,15 @@
         {% endif %}
     </div>
     <div>
+        {% if post_id: %}
+        <a href="{{uri_for('permalink', post_id=post_id)}}" class="btn btn-default">
+            <span class="glyphicon glyphicon-arrow-left"></span> Cancel
+        </a>
+        {% else %}
+        <a href="{{uri_for('home')}}" class="btn btn-default">
+            <span class="glyphicon glyphicon-arrow-left"></span> Cancel
+        </a>
+        {% endif %}
         <button type="submit" class="btn btn-primary">
             <span class="glyphicon glyphicon-send"></span> Send
         </button>

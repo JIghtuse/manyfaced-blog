@@ -5,7 +5,7 @@
     <input type="hidden" name="post_id" value="{{post_id}}">
     <div>
         <label for="comment-text">Content</label>
-        <textarea id="comment-text", name="comment-text" class="form-control" rows="10">{{content}}</textarea>
+        <textarea id="comment-text", name="comment-text" class="form-control" rows="10" required>{{content}}</textarea>
         {% if comment_error: %}
         <div class="alert alert-danger">
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -14,6 +14,9 @@
         {% endif %}
     </div>
     <div>
+        <a href="{{uri_for('permalink', post_id=post_id)}}" class="btn btn-default">
+            <span class="glyphicon glyphicon-arrow-left"></span> Cancel
+        </a>
         <button type="submit" class="btn btn-primary">
             <span class="glyphicon glyphicon-send"></span> Send
         </button>

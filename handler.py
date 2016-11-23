@@ -23,6 +23,7 @@ class Handler(webapp2.RequestHandler):
     JINJA_FS_LOADER = jinja2.FileSystemLoader(TEMPLATES_DIR)
     JINJA_ENV = jinja2.Environment(loader=JINJA_FS_LOADER, autoescape=True)
     JINJA_ENV.filters['nl2br'] = nl2br
+    JINJA_ENV.globals['uri_for'] = webapp2.uri_for
 
     @classmethod
     def render_template(cls, template_filename, **params):

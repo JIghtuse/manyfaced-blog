@@ -4,7 +4,7 @@
             {% if permalink: %}
             {{ post.title }}
             {% else %}
-            <a href="/blog/{{post.key.id()}}">{{ post.title }}</a>
+            <a href="{{uri_for('permalink', post_id=post.key.id())}}">{{ post.title }}</a>
             {% endif %}
         </h2>
     </div>

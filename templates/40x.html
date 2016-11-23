@@ -4,7 +4,7 @@
 <div class="alert alert-danger">
 <h2>{{error_title}}</h2>
 {{error_message}}
-You can return to homepage by clicking <a href="/">here</a>.
+You can return to homepage by clicking <a href="{{uri_for('home')}}">here</a>.
 
 {% if error_details: %}
 <p>
