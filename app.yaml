@@ -9,6 +9,9 @@ handlers:
 - url: /fonts
   static_dir: templates/fonts
 
+- url: /js
+  static_dir: templates/js
+
 - url: /images/
   static_dir: templates/images
 
