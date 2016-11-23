@@ -30,7 +30,7 @@ def make_vote(self, post, like, unlike):
         return self.abort(400, "Liking and unliking simultaneosly forbidden")
 
     if not self.user:
-        return self.redirect(self.uri_for("signup"))
+        return self.redirect_to_uri("signup")
 
     if post.author.id() != self.user.key.id():
         if like:
@@ -53,16 +53,14 @@ def make_change(self, post, edit, delete):
         return self.abort(400, "Edit and delete simultaneosly forbidden")
 
     if not self.user:
-        return self.redirect(self.uri_for("signup"))
+        return self.redirect_to_uri("signup")
 
     if post.author.id() == self.user.key.id():
         if edit:
-            return self.redirect(
-                self.uri_for(
-                    "post_edit", post_id=post.key.id()))
+            return self.redirect_to_uri("post_edit", post_id=post.key.id())
         elif delete:
             post.key.delete()
-            return self.redirect(self.uri_for("home"))
+            return self.redirect_to_uri("home")
     logging.warning(
         "Suspicious request (user changes post of another user): {}".format(
             self.request))
@@ -77,7 +75,7 @@ def make_comment_change(self, comment_id, edit, delete):
         return self.abort(400, "Edit and delete simultaneosly forbidden")
 
     if not self.user:
-        return self.redirect(self.uri_for("signup"))
+        return self.redirect_to_uri("signup")
 
     comment = Comment.get_by_id(int(comment_id))
     if not comment:
@@ -87,12 +85,10 @@ def make_comment_change(self, comment_id, edit, delete):
 
     if comment.user.id() == self.user.key.id():
         if edit:
-            return self.redirect(self.uri_for("comment_edit",
-                                              comment_id=key.id()))
+            return self.redirect_to_uri("comment_edit", comment_id=key.id())
         elif delete:
             comment.key.delete()
-            return self.redirect(self.uri_for("permalink",
-                                              post_id=comment.post.id()))
+            return self.redirect_to_uri("permalink", post_id=comment.post.id())
     logging.warning("User forbidden to change comment: {}".format(
         self.request))
     return self.abort(403, "You cannot change other user comments")
@@ -117,7 +113,7 @@ class HomePage(BlogHandler):
         if like or unlike:
             return make_vote(self, post, like, unlike)
         elif comment:
-            return self.redirect(self.uri_for('newcomment', post_id=post_id))
+            return self.redirect_to_uri('newcomment', post_id=post_id)
         else:
             logging.warning("Suspicious request (no user action): {}".format(
                 self.request))
@@ -163,7 +159,7 @@ class NewPostPage(BlogRegisteredOnlyHandler):
             post.put()
 
             post_id = post.key.id()
-            self.redirect(self.uri_for("permalink", post_id=str(post_id)))
+            self.redirect_to_uri("permalink", post_id=str(post_id))
         else:
             self.render_page(**params)
 
@@ -210,7 +206,7 @@ class PostEditPage(NewPostPage):
         post.content = content
         post.title = title
         post.put()
-        self.redirect(self.uri_for("permalink", post_id=post_id))
+        self.redirect_to_uri("permalink", post_id=post_id)
 
 
 class PostPermalinkPage(BlogHandler):
@@ -246,7 +242,7 @@ class PostPermalinkPage(BlogHandler):
         elif edit or delete:
             return make_change(self, post, edit, delete)
         elif comment:
-            return self.redirect(self.uri_for('newcomment', post_id=post_id))
+            return self.redirect_to_uri('newcomment', post_id=post_id)
         elif comment_id and (comment_edit or comment_delete):
             return make_comment_change(self, comment_id,
                                        comment_edit, comment_delete)
@@ -283,7 +279,7 @@ class NewCommentPage(BlogRegisteredOnlyHandler):
             comment = Comment(user=self.user.key, post=post.key, content=text)
             comment.put()
 
-            self.redirect(self.uri_for("permalink", post_id=post_id))
+            self.redirect_to_uri("permalink", post_id=post_id)
         else:
             params['comment_error'] = "Comment cannot be empty"
             self.render_page(**params)
@@ -316,7 +312,7 @@ class EditCommentPage(BlogRegisteredOnlyHandler):
             comment.content = text
             comment.put()
 
-            self.redirect(self.uri_for("permalink", post_id=post_id))
+            self.redirect_to_uri("permalink", post_id=post_id)
         else:
             params['comment_error'] = "Comment cannot be empty"
             self.render_page(**params)
@@ -396,7 +392,7 @@ class SignupPage(BlogHandler):
             user.put()
 
             self.login(user)
-            self.redirect(self.uri_for("welcome"))
+            self.redirect_to_uri("welcome")
 
 
 class LoginPage(BlogHandler):
@@ -413,7 +409,7 @@ class LoginPage(BlogHandler):
         user = User.login(username, password)
         if user:
             self.login(user)
-            self.redirect(self.uri_for("welcome"))
+            self.redirect_to_uri("welcome")
         else:
             self.render_login_form(username, "Invalid login")
 
@@ -421,7 +417,7 @@ class LoginPage(BlogHandler):
 class LogoutHandler(BlogRegisteredOnlyHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', "user_id=; Path=/")
-        self.redirect(self.uri_for("signup"))
+        self.redirect_to_uri("signup")
 
 
 class CreditsPage(BlogHandler):

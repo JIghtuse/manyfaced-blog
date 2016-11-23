@@ -38,3 +38,6 @@ class Handler(webapp2.RequestHandler):
     def render(self, template_filename, **kw):
         """Use helper functions to output template with specified parameters"""
         self.write(Handler.render_template(template_filename, **kw))
+
+    def redirect_to_uri(self, uri_name, **kw):
+        return self.redirect(self.uri_for(uri_name, **kw))
